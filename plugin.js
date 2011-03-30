@@ -112,19 +112,7 @@ GENTICS.Aloha.ColorSelector.init = function () {
                 if (that.editable) {
                     that.editable.obj[0].focus();
                 }
-                var markup = jQuery('<span style="' + style + ':' + value + '"></span>');
-                var rangeObject = GENTICS.Aloha.Selection.rangeObject;
-                var foundMarkup = rangeObject.findMarkup(function() {
-                    return this.nodeName.toLowerCase() == markup.get(0).nodeName.toLowerCase()
-                },
-                that.editable.obj);
-
-                if (foundMarkup) {
-                    jQuery(foundMarkup).css(style, value);
-                } else {
-                    GENTICS.Utils.Dom.addMarkup(rangeObject, markup)
-                }
-                rangeObject.select();
+                applyFormat(style, value);
                 that.hide();
                 return false;
             });
@@ -138,5 +126,41 @@ GENTICS.Aloha.ColorSelector.init = function () {
         this.visible = false;
         jQuery('body').unbind('click');
     };
+
+    function applyFormat (style, value) {
+        var markupClassName = 'GENTICS_markup_' + [style.replace('-', '_'), value].join('_');
+
+        var markup = jQuery('<span class="' + markupClassName + '" style="' + style + ':' + value + '"></span>');
+        var rangeObject = GENTICS.Aloha.Selection.rangeObject;
+
+        // check whether the markup is found in the range (at the start of the range)
+        var foundMarkup = rangeObject.findMarkup(function() {
+            return this.nodeName.toLowerCase() == markup.get(0).nodeName.toLowerCase() && this.className === markupClassName;
+        }, GENTICS.Aloha.activeEditable.obj);
+
+        if (foundMarkup) {
+            // remove the markup
+            if (rangeObject.isCollapsed()) {
+                // when the range is collapsed, we remove exactly the one DOM element
+                GENTICS.Utils.Dom.removeFromDOM(foundMarkup, rangeObject, true);
+            } else {
+                // the range is not collapsed, so we remove the markup from the range
+                GENTICS.Utils.Dom.removeMarkup(rangeObject, markup, GENTICS.Aloha.activeEditable.obj);
+            }
+        } else {
+            // when the range is collapsed, extend it to a word
+            if (rangeObject.isCollapsed()) {
+                GENTICS.Utils.Dom.extendToWord(rangeObject);
+            }
+
+            // add the markup
+            GENTICS.Utils.Dom.addMarkup(rangeObject, markup);
+        }
+        // select the modified range
+        rangeObject.select();
+    }
+
+    function markupClassName (style, value) {
+    }
 
 };
