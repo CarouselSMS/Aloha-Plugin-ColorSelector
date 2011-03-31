@@ -25,6 +25,7 @@ GENTICS.Aloha.ColorSelector.init = function () {
 
     var that = this,
     style = jQuery('<style>' +
+    '.GENTICS_dropdown_colorbox {padding: 4px; position: absolute; background: #FFFFFF; z-index: 11001; border: 1px solid #AAAAAA;}'+
     '.GENTICS_button_text_color {background: url("/javascripts/aloha/deps/extjs/resources/images/default/editor/tb-sprite.gif") repeat scroll -160px 0 transparent !important}' +
     '.GENTICS_button_text_background {background: url("/javascripts/aloha/deps/extjs/resources/images/default/editor/tb-sprite.gif") repeat scroll -176px 0 transparent !important}' +
     '</style>');
@@ -69,7 +70,7 @@ GENTICS.Aloha.ColorSelector.init = function () {
         this.targetButton.setPressed(true);
         this.target = jQuery(target.el.dom);
         var offset = this.target.offset();
-        this.el = jQuery('<div style="padding: 4px; position: absolute; background: #FFFFFF; z-index: 11001; border: 1px solid #AAAAAA;"></div>');
+        this.el = jQuery('<div class="GENTICS_dropdown_colorbox"></div>');
         this.el.css('top', offset.top + this.target.height());
         this.el.css('left', offset.left);
         this.populateColors(style);
@@ -142,9 +143,6 @@ GENTICS.Aloha.ColorSelector.init = function () {
         }
         // select the modified range
         rangeObject.select();
-    }
-
-    function markupClassName (style, value) {
     }
 
 };
