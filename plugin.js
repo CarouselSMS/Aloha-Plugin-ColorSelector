@@ -25,73 +25,57 @@ GENTICS.Aloha.ColorSelector.init = function () {
 
     var that = this,
     style = jQuery('<style>' +
+    '.GENTICS_dropdown_colorbox {padding: 4px; position: absolute; background: #FFFFFF; z-index: 11001; border: 1px solid #AAAAAA;}'+
     '.GENTICS_button_text_color {background: url("/javascripts/aloha/deps/extjs/resources/images/default/editor/tb-sprite.gif") repeat scroll -160px 0 transparent !important}' +
     '.GENTICS_button_text_background {background: url("/javascripts/aloha/deps/extjs/resources/images/default/editor/tb-sprite.gif") repeat scroll -176px 0 transparent !important}' +
     '</style>');
 
     jQuery.each(GENTICS.Aloha.ColorSelector.config.colors, function(index, value){
-        style.append('button.GENTICS_button_'+ value +' { background: '+ value +' !important; border: 0; float: left; margin: 3px; width: 16px; height: 16px;} ');
+        style.append('button.GENTICS_button_'+ value +' { background: '+ value +' !important; border: 0; float: left; margin: 3px; width: 16px; height: 16px; border: 1px solid #888;} ');
     });
 
     style.appendTo('head');
 
-    // // add it to the floating menu
-    // GENTICS.Aloha.FloatingMenu.addButton(
-    //   'GENTICS.Aloha.continuoustext',
-    //   button,
-    //   GENTICS.Aloha.i18n(GENTICS.Aloha, 'floatingmenu.tab.format'),
-    //   1
-    // );
-
-    // jQuery.each(GENTICS.Aloha.ColorSelector.config.colors, function(index, value){
-    //     GENTICS.Aloha.FloatingMenu.addButton(
-    //         "GENTICS.Aloha.continuoustext",
-    //         buttons[value],
-    //         that.i18n("floatingmenu.tab.color"),
-    //         1
-    //     );
-    // });
     var layer = new Layer();
-
-    GENTICS.Aloha.FloatingMenu.addButton(
-        "GENTICS.Aloha.continuoustext",
-        new GENTICS.Aloha.ui.Button({
-            "iconClass": "GENTICS_button_text_color",
-            "size": "small",
-            "onclick": function (button) {
-                layer.display(button.el.dom, 'color');
+    var buttons = {};
+    jQuery(['color', 'background-color']).each(function (index, style) {
+        buttons[style] = new GENTICS.Aloha.ui.Button({
+            'iconClass': 'GENTICS_button_text_' + style.split('-')[0],
+            'size': 'small',
+            'toggle': true,
+            'onclick': function (button) {
+                layer.display(button, style);
             }
-        }),
-        that.i18n("floatingmenu.tab.format"),
-        1
-    );
+        });
+        GENTICS.Aloha.FloatingMenu.addButton(
+            'GENTICS.Aloha.continuoustext',
+            buttons[style],
+            that.i18n('floatingmenu.tab.format'),
+            1
+        );
+    });
 
-    GENTICS.Aloha.FloatingMenu.addButton(
-        "GENTICS.Aloha.continuoustext",
-        new GENTICS.Aloha.ui.Button({
-            "iconClass": "GENTICS_button_text_background",
-            "size": "small",
-            "onclick": function (button) {
-                layer.display(button.el.dom, 'background-color');
-            }
-        }),
-        that.i18n("floatingmenu.tab.format"),
-        1
-    );
-    function Layer () {
-    }
+    function Layer () {}
 
     Layer.prototype.display = function (target, style) {
-        if (this.visible) return;
+        if (this.visible) {
+            if (this.visible === style) {
+                return;
+            } else {
+                this.hide();
+            }
+        }
         var that = this;
-        this.target = jQuery(target);
+        this.targetButton = buttons[style];
+        this.targetButton.setPressed(true);
+        this.target = jQuery(target.el.dom);
         var offset = this.target.offset();
-        this.el = jQuery('<div style="padding: 4px; position: absolute; background: #ddd; z-index: 11001"></div>');
+        this.el = jQuery('<div class="GENTICS_dropdown_colorbox"></div>');
         this.el.css('top', offset.top + this.target.height());
         this.el.css('left', offset.left);
         this.populateColors(style);
         this.el.width(132);
-        this.el.height(60);
+        this.el.height(44);
         this.el.show();
         jQuery('body').append(this.el).bind('click', function(e) {
             if (that.visible) {
@@ -100,7 +84,7 @@ GENTICS.Aloha.ColorSelector.init = function () {
         });
         this.editable = GENTICS.Aloha.activeEditable;
         setTimeout(function () {
-            that.visible = true;
+            that.visible = style;
         }, 10);
     };
 
@@ -125,6 +109,7 @@ GENTICS.Aloha.ColorSelector.init = function () {
         this.el.remove();
         this.visible = false;
         jQuery('body').unbind('click');
+        this.targetButton.setPressed(false);
     };
 
     function applyFormat (style, value) {
@@ -158,9 +143,6 @@ GENTICS.Aloha.ColorSelector.init = function () {
         }
         // select the modified range
         rangeObject.select();
-    }
-
-    function markupClassName (style, value) {
     }
 
 };
